@@ -12,7 +12,7 @@
  *
  *   The identities. Contract Value minus Verified Cost equals Financial Impact, to the
  *   cent, per vendor and portfolio-wide, or the page is telling three different
- *   stories about the same money. And Unproductive Cost stays above Financial Impact, so
+ *   stories about the same money. And Leakage Value stays above Financial Impact, so
  *   the two figures on screen do not read as an error.
  *
  *   The floors. No day anywhere is missing a series, and no day prints a
@@ -37,8 +37,8 @@ const expected: Record<string, Record<string, string>> = {
     expectedHrs: '433.98K hrs', logged: '491.84K hrs', productive: '295.11K hrs',
     leakage: '45.33%', leakValue: '$14.56M', hnd: '138.87K hrs', fteEq: '96', leakFte: '136',
     costLoss: '$10.28M', contractValue: '$32.11M', actual: '$21.84M', cph: '$108.82',
-    ot: '7%', otTracked: '34.43K hrs', otClaimed: '25.82K hrs', otFte: '18',
-    otBilled: '$1.91M', unprodOt: '$1.02M', idleCost: '$5.1M', idleCap: '32%',
+    ot: '7%', otTracked: '34.43K hrs', otClaimed: '46.48K hrs', otFte: '32',
+    otBilled: '$3.44M', unprodOt: '$1.02M', idleCost: '$5.1M', idleCap: '32%',
   },
   'CTS Consulting': {
     score: '65.2', cu: '58%', eu: '55%', out: '86.9%', sla: '76%', dp: '66.04%',
@@ -63,6 +63,21 @@ const eq = (label: string, got: unknown, want: unknown) => {
   const ok = String(got) === String(want)
   if (!ok) fails++
   console.log(`${ok ? 'ok  ' : 'FAIL'}  ${label.padEnd(52)} got ${String(got).padEnd(15)} want ${want}`)
+}
+
+/* Overtime claimed is always at least overtime tracked.
+ *
+ *  A vendor bills the client for time at the desk; ProHance counts the part of
+ *  it that became work. Logged is never below productive, so a claim below what
+ *  was tracked means a vendor under-billing its own overtime, which is not the
+ *  story this dashboard is for. Until tracked is derived from productive hours
+ *  above the daily threshold and claimed from logged hours above it, the
+ *  relationship rests on claimedOtMultiplier in config/vendors.json, so it gets
+ *  a test. Agreed with the product owner 28 Sep 2026. */
+for (const name of VENDOR_NAMES) {
+  const t = aggregate(name, r.a, r.b)
+  eq(`${name} claims at least the overtime it worked`,
+     F.claimedOvertimeHours(t, name) >= t.ot, true)
 }
 
 for (const [name, want] of Object.entries(expected)) {

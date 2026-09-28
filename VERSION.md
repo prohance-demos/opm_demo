@@ -3,6 +3,25 @@
 Newest first. One line per change. Bump the minor number for new capability,
 the patch number for fixes only.
 
+## 1.9.1, 28 Sep 2026
+
+- **Leakage Value is back**, at the product owner's decision. The formula is
+  untouched: still `(logged - productive) x rate`, $40.34M, still distinct from
+  Financial Impact's `(contracted - productive) x rate` at $34.24M. Only the
+  labels moved, so no test expectation on a number changed. The family reads
+  Leakage Value, Leakage Breakdown, Unproductive FTEs and Leakage hours, which keeps
+  one name per definition and keeps "Gap" from meaning two things again.
+- **Overtime claimed is now always above overtime tracked.** Adventure Inc's
+  `claimedOtMultiplier` was 0.75, so the demo showed a vendor under-billing its
+  own overtime, which is not the story this dashboard is for. It is 1.35 now, so
+  the three vendors over-claim by 35%, 50% and 100%, ranked the same way their
+  scores are. A new engine assertion pins the relationship for every vendor
+  rather than leaving it to a config value anyone can set below 1.
+- The deeper overtime fix is recorded as a known defect in `CLAUDE.md` and is
+  still deferred: tracked should be derived from productive hours above the
+  daily threshold and claimed from logged hours above it, at which point the
+  relationship holds by construction and needs no multiplier.
+
 ## 1.9.0, 26 Sep 2026
 
 Richard's review of 25 Sep, and one defect it surfaced.
@@ -11,7 +30,7 @@ Richard's review of 25 Sep, and one defect it surfaced.
   Cost Loss printing the same number under two labels. The code showed worse:
   `financialImpact.hero` and `costAtRisk.hero` are identical calls, and Cost of
   the Gap is that same figure a third time. Five collision groups resolved.
-  Financial Impact for contracted capacity not delivered, Unproductive Cost for
+  Financial Impact for contracted capacity not delivered, Leakage Value for
   logged hours that were not productive, Verified Cost for the productive work
   delivered, Hours not delivered and Excess FTEs for the hours and the people.
   Person nouns are Employee and Headcount only, so the Resources pair on Partner

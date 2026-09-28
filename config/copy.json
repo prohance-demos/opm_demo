@@ -69,13 +69,13 @@
       }
     },
     "leakageSummary": {
-      "label": "Unproductive Cost Breakdown",
+      "label": "Leakage Breakdown",
       "tooltip": {
         "card": "Logged hours that did not become productive work, valued at your rate card."
       }
     },
     "leakageValue": {
-      "label": "Unproductive Cost",
+      "label": "Leakage Value",
       "tooltip": {
         "hero": "Logged hours that did not become productive work, valued at your rate card."
       }

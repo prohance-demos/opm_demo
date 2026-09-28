@@ -262,7 +262,7 @@ See `docs/AUDIT-2026-09-23.md` for the full table with reasons.
   because a governance conversation about $40M does not happen over a $4M
   portfolio.
 - Idle Capacity is 100 minus Capacity Utilization, the PEM Metrics workbook
-  definition. Unproductive Cost is non-productive hours over *contracted* hours, not over
+  definition. Leakage Value is non-productive hours over *contracted* hours, not over
   logged hours, at the product owner's instruction: the reference point is what
   you paid for.
 - Overtime bills at the contracted rate. There is no premium, confirmed with the
@@ -272,7 +272,7 @@ See `docs/AUDIT-2026-09-23.md` for the full table with reasons.
 - Delta chips carry a `tone` separate from their arrow direction. A rising cost
   points up and reads red. Set `goodDown` on `delta()` and `moneyDelta()` for
   any metric where less is better.
-- Threshold pills go on exactly two metrics, Vendor Score and Unproductive Cost Breakdown,
+- Threshold pills go on exactly two metrics, Vendor Score and Leakage Breakdown,
   which is what the live build badges. Audited 23 Sep 2026 and pinned by a test.
   Overtime Integrity states its number and leaves the reading to the viewer.
 - The drilldown chevron is on Financial Impact, as in the live build, and on
@@ -282,8 +282,8 @@ See `docs/AUDIT-2026-09-23.md` for the full table with reasons.
   Lead, Manager, each with a cost factor. The designation strip on a vendor card
   rescales that column by the designation's share of the roster; the aside rows
   sum to the vendor's headcount.
-- Unproductive Cost sits above Financial Impact across the portfolio, $40.34M
-  against $34.24M. Unproductive Cost counts every non-productive hour inside
+- Leakage Value sits above Financial Impact across the portfolio, $40.34M
+  against $34.24M. Leakage Value counts every non-productive hour inside
   logged time; Financial Impact counts only the hours never delivered against
   contracted capacity. A build where the first came in under the second was
   telling the reader that waste is smaller than absence. `test:engine` pins the ordering. One
@@ -300,7 +300,7 @@ See `docs/AUDIT-2026-09-23.md` for the full table with reasons.
 - The contract exhaustion date is derived from the burn and the term, never
   configured. A configured date let Adventure Inc read 91% spent against 93% of
   its term elapsed while claiming the money ran out a month early.
-- "Financial Impact", "Unproductive Cost", "Verified Cost" and "Headcount by
+- "Financial Impact", "Leakage Value", "Verified Cost" and "Headcount by
   Designation" are the current names. The metric ids behind them are still
   `costAtRisk`, `leakageValue`, `billableCost` and `headcountByRole`, so a
   rename stays a `config/copy.json` edit and no test or lens config has to move.
@@ -332,7 +332,7 @@ every screen**. Before 1.9 the same function was labelled three ways.
 | The quantity | The one name |
 | --- | --- |
 | `(contracted - productive) x rate` | **Financial Impact** |
-| `(logged - productive) x rate` | **Unproductive Cost** |
+| `(logged - productive) x rate` | **Leakage Value** |
 | `productive x rate` | **Verified Cost** |
 | `contracted - productive`, in hours | **Hours not delivered** |
 | the same, in people | **Excess FTEs** |
@@ -356,6 +356,33 @@ appear inside a tooltip as plain English, which explains rather than competes.
 Neither "users" nor "contractors" has ever appeared in this build; that was
 production, not the prototype.
 
+
+## Open: overtime tracked and claimed
+
+Both are wrong today and the product owner has parked the fix.
+
+- **Overtime tracked** is a configured total (`ot` in `vendors.json`), not
+  derived from anything. Its tooltip claims "productive time above 7.5 hours a
+  person a day", which is the intended definition, not the calculation.
+- **Overtime claimed** is tracked times a per-vendor multiplier
+  (`claimedOtMultiplier`: 0.75, 1.5, 2.0). The vendor's logged hours are not
+  used, and a multiplier under 1 makes a vendor under-bill its own overtime.
+
+The agreed direction, 28 Sep: **tracked** becomes productive hours above the
+daily threshold, **claimed** becomes logged hours above it. Because logged is
+always at least productive, claimed is then always at least tracked, so the
+invariant falls out of the data instead of being set by config. The gap between
+them is the non-productive part of the overtime, which is the number the
+customer is being billed for and did not get.
+
+Cost: tracked needs a per-person daily hours distribution, which the engine does
+not have. The seat model draws utilization per seat, not hours per seat per day.
+Claimed from logged is a formula swap; tracked is new engine work.
+
+Until then, **claimed must never fall below tracked**, which is the product
+owner's rule of 28 Sep. `claimedOtMultiplier` is above 1 for every vendor and
+`test:engine` asserts the relationship, so setting one below 1 fails the build
+rather than shipping a vendor that under-bills its own overtime.
 
 ## Units, and the persona that reads them
 
@@ -488,7 +515,7 @@ width, and two baselines on the vendor page, which is two rows of four.
 
 ## A list of numbers is not a visualisation
 
-Partner Efficiency and the Unproductive Cost Breakdown were 575px and 572px, the two tallest
+Partner Efficiency and the Leakage Breakdown were 575px and 572px, the two tallest
 cards on a page already four screens long, and both were a column of label-value
 rows. They are one stacked bar each now, `StackBar` in `MetricSection.tsx`,
 which is the progress-bar idiom the location rows already use, split into named

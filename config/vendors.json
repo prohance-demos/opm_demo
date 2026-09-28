@@ -26,7 +26,7 @@
         "to": "2026-11-30",
         "burn": 0.96
       },
-      "claimedOtMultiplier": 0.75,
+      "claimedOtMultiplier": 1.35,
       "calibration": {
         "expected": 433980,
         "productive": 295106,

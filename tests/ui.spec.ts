@@ -283,7 +283,7 @@ test('the Cost Efficiency hero is five tiles in one row', async ({ page }) => {
   const tiles = page.locator('.kpis .kpi')
   await expect(tiles).toHaveCount(5)
   await expect(page.locator('.kpi-label')).toHaveText([
-    /Unproductive Cost/, /Capacity Utilization/, /Hours not delivered/,
+    /Leakage Value/, /Capacity Utilization/, /Hours not delivered/,
     /Excess FTEs/, /Upcoming Contract Renewals/,
   ])
   // one row: every tile starts at the same y, and every number does too
@@ -323,9 +323,9 @@ test('the renewals tile opens the list of contracts behind the count', async ({ 
   await expect(page.locator('.kpi-pop')).toHaveCount(0)
 })
 
-test('Unproductive Cost Breakdown splits the leak by where it went', async ({ page }) => {
+test('Leakage Breakdown splits the leak by where it went', async ({ page }) => {
   await page.goto('/#/costEfficiency')
-  const card = page.locator('.sect', { hasText: 'Unproductive Cost Breakdown' }).first()
+  const card = page.locator('.sect', { hasText: 'Leakage Breakdown' }).first()
   await expect(card.locator('.bignum')).toHaveText(/%$/)
   await expect(card.locator('.badge')).toHaveCount(1)   // one of the two production badges
   // three named slices, drawn as one bar across contracted capacity
@@ -597,7 +597,7 @@ test('a rising cost reads red even though the arrow points up', async ({ page })
     label: e.querySelector('.kpi-label')?.textContent?.trim() ?? '',
     cls: e.querySelector('.delta')?.className ?? '',
   })))
-  for (const t of tone.filter(x => /Unproductive Cost|Hours not delivered|Excess FTEs/.test(x.label))) {
+  for (const t of tone.filter(x => /Leakage Value|Hours not delivered|Excess FTEs/.test(x.label))) {
     if (!t.cls) continue
     const up = /\bup\b/.test(t.cls)
     expect(t.cls, `${t.label} going ${up ? 'up' : 'down'} must read ${up ? 'bad' : 'good'}`)
@@ -818,7 +818,7 @@ test('only Vendor Score and Leakage Summary carry a threshold badge', async ({ p
       badge: !!s.querySelector('.badge'),
     })))) if (name.badge) badged.add(name.title.replace(/\s+$/, ''))
   }
-  expect([...badged].sort()).toEqual(['Unproductive Cost Breakdown', 'Vendor Score'])
+  expect([...badged].sort()).toEqual(['Leakage Breakdown', 'Vendor Score'])
 })
 
 test('only Financial Impact and its two components carry a drilldown chevron', async ({ page }) => {
