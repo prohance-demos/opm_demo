@@ -9,7 +9,7 @@ project honest and where each kind of change belongs.
 Current version is in `VERSION.md`. Add an entry there for anything that changes
 behaviour, one line, newest first.
 
-## The four rules
+## The five rules
 
 **1. Numbers come from the engine, never from a literal in a component.**
 There is exactly one source of data: a deterministic daily series per vendor in
@@ -28,7 +28,24 @@ geometry. The Playwright suite drives every filter and guards every defect the
 September audit found. If a change moves one of those on purpose, update the
 expectation in the same commit and say why in `VERSION.md`.
 
-**3. No screen may ever print "No data available", and no percentage may ever
+**3. The clock is live, and every window compares against an equal span.**
+`TODAY` in `src/engine/dataset.ts` is the real date. It was a constant in
+`config/vendors.json` until 1.10, which meant renewal countdowns, term-elapsed
+percentages and the last day of data drifted one day further from the truth
+every day, and a renewal that fell due never left the 90-day window. Three
+overrides pin it for a test run or a rehearsal: `window.__PEM_TODAY__`, the
+`PEM_TODAY` env var, and `?today=YYYY-MM-DD`. Both Node test runners and the
+Playwright suite pin 2026-09-15, which is why every expectation in them is still
+a constant.
+
+`prevRange` cuts the previous window to as many days as the current one has
+actually covered, because the current period is usually still running. Without
+that, Financial Impact read "-$12.83M vs last year" on a Yearly view holding 271
+days against 365, and Monthly read roughly minus half of everything. Ratios hid
+it, because numerator and denominator truncate together. `test:engine` asserts
+equal spans on six periods.
+
+**4. No screen may ever print "No data available", and no percentage may ever
 exceed 100.**
 Production has empty cells for reasons a prototype does not get to borrow. Four
 things hold this: every calendar day carries data including weekends
@@ -40,7 +57,7 @@ capacity, worked hours and tasks are three families in `dayRaw`. `test:engine`
 walks every day of eleven years checking that no subset escapes its set, and
 `test:ui` sweeps every period on every lens.
 
-**4. Never put a CSS class on an SVG element without checking the stylesheet.**
+**5. Never put a CSS class on an SVG element without checking the stylesheet.**
 In SVG 2 the CSS geometry properties (`height`, `width`, `x`, `y`) apply to
 shapes and **override the presentation attribute**. A `.bar` rule written for the
 progress bars silently collapsed every column chart to 7px, and an automated
@@ -198,9 +215,15 @@ so nothing is off limits. Three things there are load-bearing:
   name reaches 95px against a 40px margin and leaves the card with it. Anything
   that long stays flat and is cut to its slot, full text on hover. `.chart` is
   clipped on both axes as the backstop.
-- `bucketsFor` drops an unfinished trailing bucket. Two days of a week beside
-  full weeks makes every money line fall to the axis at the right edge, which
-  reads as a collapse rather than as a period still running.
+- `bucketsFor` draws an unfinished trailing bucket once **half of it has
+  elapsed**, `PART_BUCKET_MIN` in `ranges.ts`, and drops it below that. Dropping
+  every one left the chart covering a shorter window than the tile above it: on
+  28 September the Yearly headline covered 271 days and its bars covered 243, so
+  adding the bars up landed 10% short of the number they sat under. Drawing
+  every one puts two days beside eleven full months and the money line falls to
+  the axis, which reads as a collapse rather than as a period still running.
+  Half is where a short bar is obviously short rather than a crash, and the
+  cliff test still passes at exactly that ratio, which is the binding case.
 - Column corners are top-only rounded, drawn as a path. A rect with `rx` rounds
   the base too, which reads wrong against the axis.
 

@@ -5,6 +5,14 @@ import { expect, test } from '@playwright/test'
 
 const LENSES = ['vendorPerformance', 'deliveryPerformance', 'capacityUtilizationHealth', 'costEfficiency']
 
+/** The app's clock is live. Every expectation below was written against a
+ *  specific day, so the suite pins it before the page loads. `__PEM_TODAY__` is
+ *  read once by `src/engine/dataset.ts`; see `resolveToday` there. */
+const PINNED = '2026-09-15'
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(d => { (window as unknown as Record<string, string>).__PEM_TODAY__ = d }, PINNED)
+})
+
 const hero = (page: import('@playwright/test').Page) =>
   page.$$eval('.kpi .kpi-val', els => els.map(e => e.textContent).join('|'))
 

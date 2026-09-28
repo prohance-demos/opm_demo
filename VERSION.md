@@ -3,6 +3,36 @@
 Newest first. One line per change. Bump the minor number for new capability,
 the patch number for fixes only.
 
+## 1.10.0, 28 Sep 2026
+
+The September audit. Six defects, all of them things the screen stated
+confidently and got wrong.
+
+- **The clock is live.** `today` was a constant in `config/vendors.json`, 13
+  days stale by the time anyone noticed. Renewal countdowns were 13 days out
+  (30 / 58 / 80 shown against a true 17 / 45 / 67) and a renewal that fell due
+  would never have left the 90-day window. Term elapsed ran 1 to 3 points low.
+  The date picker refused the last two weeks of September. All four follow from
+  the one change. `dataTo` moved out to 2030 so the data runs to today, and
+  calibration is clamped to the calibration year so a live clock in January 2027
+  cannot spread one year's totals across fifteen months.
+- **Deltas compare equal spans.** The current period is truncated at today while
+  the one before it is complete, so every money and hours delta on the live
+  period was wrong by the ratio: 271 days against 365 on Yearly, 27 against 31
+  on Monthly. Financial Impact read **-$12.83M vs last year**; it reads
+  **+$0.29M** now. Percentages were always right, which is why this survived
+  four reviews.
+- **A part-month now appears on the chart.** Yearly showed Jan to Aug while its
+  tile aggregated to 28 September, so the bars summed to 90% of the headline.
+  A trailing bucket is drawn once half of it has run, `PART_BUCKET_MIN`.
+- **Monthly on the current month** showed 2 bars; it shows 4, and will show 5
+  once the week completes. That one was a symptom of the frozen clock.
+- Six new assertions in `test:engine` cover equal spans on six periods, the
+  half-bucket threshold, and that the bars cover the window the tile aggregates.
+- Not changed: Reset and Apply. They work. Reset restores the page's filters and
+  disables itself at defaults; Apply commits a staged multiselect and disables
+  itself when nothing is staged. Production has both, so both stay.
+
 ## 1.9.1, 28 Sep 2026
 
 - **Leakage Value is back**, at the product owner's decision. The formula is

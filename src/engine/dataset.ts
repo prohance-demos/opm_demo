@@ -9,9 +9,39 @@ const utc = (iso: string) => {
   return Date.UTC(y, m - 1, d)
 }
 
-/** "Today" for the whole app. Nothing after this date has data. Change it in
- *  config/vendors.json to move the prototype's clock. */
-export const TODAY = utc(vendorsCfg.today)
+/** "Today" for the whole app. Nothing after this date has data.
+ *
+ *  Live by default, so a renewal that falls due actually falls out of the
+ *  90-day window, a part-month chart grows a bar each week, and the date picker
+ *  lets you pick yesterday. It used to be a constant in `config/vendors.json`,
+ *  which meant every countdown, every term-elapsed percentage and the last day
+ *  of data drifted one day further from the truth every day.
+ *
+ *  Three overrides, in order, all for pinning the clock rather than for normal
+ *  use. Tests need a fixed day or every expectation would move overnight; a
+ *  rehearsal sometimes wants the same screen twice.
+ *
+ *    window.__PEM_TODAY__     set by the Playwright suite before the page loads
+ *    PEM_TODAY                env var, for the Node engine and chart tests
+ *    ?today=YYYY-MM-DD        query string, for a pinned demo
+ */
+function resolveToday(): number {
+  const g = globalThis as Record<string, unknown>
+  const pinned =
+    (typeof g.__PEM_TODAY__ === 'string' ? g.__PEM_TODAY__ : null) ??
+    ((g.process as { env?: Record<string, string> } | undefined)?.env?.PEM_TODAY ?? null) ??
+    (typeof location !== 'undefined'
+      ? new URLSearchParams(location.search).get('today')
+      : null)
+  if (pinned && /^\d{4}-\d{2}-\d{2}$/.test(pinned)) {
+    const t = utc(pinned)
+    if (isFinite(t)) return t
+  }
+  const n = new Date()
+  return Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate())
+}
+
+export const TODAY = resolveToday()
 export const CALIBRATION_YEAR = vendorsCfg.calibrationYear
 export const HOURS_PER_FTE_DAY = vendorsCfg.hoursPerFteDay
 export const RENEWAL_WINDOW_DAYS = vendorsCfg.renewalWindowDays
@@ -124,7 +154,11 @@ function dayRaw(name: string, t: number): Record<TotalKey, number> | null {
  * ------------------------------------------------------------------ */
 const SCALE: Record<string, Record<TotalKey, number>> = {}
 for (const cfg of VENDORS) {
-  const end = Math.min(TODAY, bounds[cfg.name].to)
+  /* Clamped to the calibration year as well as to today. Without the year
+     clamp, a live clock in January 2027 would spread one year's configured
+     totals across fifteen months and quietly shrink every historical day. */
+  const yearEnd = Date.UTC(CALIBRATION_YEAR, 11, 31)
+  const end = Math.min(TODAY, bounds[cfg.name].to, yearEnd)
   const sums = Object.fromEntries(TOTAL_KEYS.map(k => [k, 0])) as Record<TotalKey, number>
   for (let t = Date.UTC(CALIBRATION_YEAR, 0, 1); t <= end; t += DAY_MS) {
     const raw = dayRaw(cfg.name, t)

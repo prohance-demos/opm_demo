@@ -18,8 +18,8 @@
  *   The floors. No day anywhere is missing a series, and no day prints a
  *   utilization over 100%.
  */
-import { VENDOR_NAMES, aggregate, aggregateMany, byName, dayValues } from '../src/engine/dataset.ts'
-import { rangeFor } from '../src/engine/ranges.ts'
+import { DAY_MS, TODAY, VENDOR_NAMES, aggregate, aggregateMany, byName, dayValues } from '../src/engine/dataset.ts'
+import { PART_BUCKET_MIN, bucketsFor, prevRange, rangeFor } from '../src/engine/ranges.ts'
 import * as F from '../src/engine/formulas.ts'
 import { fte, hrs, pct, trimN, usd } from '../src/engine/format.ts'
 import type { DateState, Totals } from '../src/engine/types.ts'
@@ -78,6 +78,61 @@ for (const name of VENDOR_NAMES) {
   const t = aggregate(name, r.a, r.b)
   eq(`${name} claims at least the overtime it worked`,
      F.claimedOvertimeHours(t, name) >= t.ot, true)
+}
+
+/* ---- the September 2026 audit: three things that used to be silently wrong -- */
+
+/* 1. Every delta compares equal spans.
+ *
+ *  The current period is usually still running. Comparing its truncated window
+ *  against a complete previous one made every money and hours delta wrong by
+ *  the ratio of the two lengths: Financial Impact read "-$12.83M vs last year"
+ *  on a Yearly view whose 271 days were being held against 365. */
+{
+  const periods: [string, DateState][] = [
+    ['Yearly 2026',    { ...st, period: 'Yearly',   year: 2026 }],
+    ['Yearly 2025',    { ...st, period: 'Yearly',   year: 2025 }],
+    ['Quarterly Q3 26',{ ...st, period: 'Quaterly', year: 2026, quarter: 3 }],
+    ['Quarterly Q1 26',{ ...st, period: 'Quaterly', year: 2026, quarter: 1 }],
+    ['Monthly Sep 26', { ...st, period: 'Monthly',  year: 2026, month: 8 }],
+    ['Monthly Aug 26', { ...st, period: 'Monthly',  year: 2026, month: 7 }],
+  ]
+  const elapsed = (x: { a: number; b: number }) => Math.min(x.b, TODAY) - x.a
+  for (const [label, ps] of periods)
+    eq(`${label} compares an equal span`,
+       elapsed(rangeFor(ps)) === elapsed(prevRange(ps)), true)
+}
+
+/* 2. A trailing bucket appears once half of it has run, and not before.
+ *
+ *  Dropping every unfinished bucket left the chart covering a shorter window
+ *  than the tile above it. Drawing every one put two days beside eleven full
+ *  months. PART_BUCKET_MIN is the line between the two. */
+{
+  /* The clock is pinned for this run, so the threshold is checked
+     arithmetically rather than by moving the date. */
+  const b = bucketsFor({ ...st, period: 'Yearly', year: 2026 })
+  const last = b[b.length - 1]
+  const span = last.b - last.a + DAY_MS
+  const whole = Date.UTC(2026, new Date(last.a).getUTCMonth() + 1, 0) - last.a + DAY_MS
+  eq('the trailing bucket drawn has at least half of it elapsed',
+     span / whole >= PART_BUCKET_MIN, true)
+  eq('no bucket starts after today', b.every(x => x.a <= TODAY), true)
+  eq('no bucket ends after today', b.every(x => x.b <= TODAY), true)
+}
+
+/* 3. The bars tie out to the tile they sit under.
+ *
+ *  The chart's buckets must cover the same window the headline aggregates, or
+ *  adding the bars up lands somewhere the number above them is not. */
+for (const label of ['Yearly', 'Quaterly', 'Monthly'] as const) {
+  const ps: DateState = { ...st, period: label }
+  const r = rangeFor(ps)
+  const b = bucketsFor(ps)
+  const covered = b.reduce((a, x) => a + (x.b - x.a + DAY_MS), 0)
+  const window = Math.min(r.b, TODAY) - r.a + DAY_MS
+  eq(`${label} bars cover the window the tile aggregates`,
+     Math.abs(covered - window) <= DAY_MS * 7, true)
 }
 
 for (const [name, want] of Object.entries(expected)) {
