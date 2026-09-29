@@ -290,7 +290,7 @@ See `docs/AUDIT-2026-09-23.md` for the full table with reasons.
   you paid for.
 - Overtime bills at the contracted rate. There is no premium, confirmed with the
   product owner.
-- Excess FTEs divides hours not delivered by 7.5 hours per working day, so it
+- Excess FTEs divides Hours Shortfall by 7.5 hours per working day, so it
   reads the same whether you look at a week or a year.
 - Delta chips carry a `tone` separate from their arrow direction. A rising cost
   points up and reads red. Set `goodDown` on `delta()` and `moneyDelta()` for
@@ -299,7 +299,7 @@ See `docs/AUDIT-2026-09-23.md` for the full table with reasons.
   which is what the live build badges. Audited 23 Sep 2026 and pinned by a test.
   Overtime Integrity states its number and leaves the reading to the viewer.
 - The drilldown chevron is on Financial Impact, as in the live build, and on
-  Hours not delivered and Excess FTEs, because that slide-out is where those two
+  Hours Shortfall and Excess FTEs, because that slide-out is where those two
   numbers live. `drill: 'costLoss'` in the registry is the hook.
 - Headcount reads by designation, not by role: Associate, Senior Associate,
   Lead, Manager, each with a cost factor. The designation strip on a vendor card
@@ -357,7 +357,7 @@ every screen**. Before 1.9 the same function was labelled three ways.
 | `(contracted - productive) x rate` | **Financial Impact** |
 | `(logged - productive) x rate` | **Leakage Value** |
 | `productive x rate` | **Verified Cost** |
-| `contracted - productive`, in hours | **Hours not delivered** |
+| `contracted - productive`, in hours | **Hours Shortfall** |
 | the same, in people | **Excess FTEs** |
 | a person on contract | an **Employee**; a count of them is **Headcount** |
 

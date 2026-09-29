@@ -47,7 +47,7 @@ export const leakageValue = (t: Totals, vendorName: string) =>
  *  a vendor that over-delivers has no shortfall, it has a surplus. */
 export const hoursNotDelivered = (t: Totals) => Math.max(0, t.expected - t.productive)
 
-/** Hours not delivered, valued at the vendor's rate card. The product calls
+/** Hours Shortfall, valued at the vendor's rate card. The product calls
  *  this Cost Loss. */
 export const costLoss = (t: Totals, vendorName: string) =>
   hoursNotDelivered(t) * (byName[vendorName]?.billRate ?? 0)
@@ -57,7 +57,7 @@ export const costLoss = (t: Totals, vendorName: string) =>
 export const contractValue = (t: Totals, vendorName: string) =>
   t.expected * (byName[vendorName]?.billRate ?? 0)
 
-/** Hours not delivered expressed as whole people, at 7.5 hours a working day.
+/** Hours Shortfall expressed as whole people, at 7.5 hours a working day.
  *  Scale-invariant: the same answer whether you look at a week or a year. */
 export function fteEquivalent(t: Totals): number | null {
   const cap = t.capDays * HOURS_PER_FTE_DAY

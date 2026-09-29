@@ -3,6 +3,12 @@
 Newest first. One line per change. Bump the minor number for new capability,
 the patch number for fixes only.
 
+## 1.10.1, 29 Sep 2026
+
+- "Hours not delivered" is now **Hours Shortfall** on every screen, tooltip and
+  doc that uses the current name. A `config/copy.json` edit; the metric id
+  `hoursNotDelivered` is unchanged. The UI tests that assert the label moved with it.
+
 ## 1.10.0, 28 Sep 2026
 
 The September audit. Six defects, all of them things the screen stated

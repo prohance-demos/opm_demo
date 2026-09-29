@@ -81,7 +81,7 @@
       }
     },
     "hoursNotDelivered": {
-      "label": "Hours not delivered",
+      "label": "Hours Shortfall",
       "tooltip": {
         "hero": "Contracted productive hours not received."
       }
@@ -89,7 +89,7 @@
     "fteEquivalent": {
       "label": "Excess FTEs",
       "tooltip": {
-        "hero": "Hours not delivered, counted as whole people at 7.5 hours a working day."
+        "hero": "Hours Shortfall, counted as whole people at 7.5 hours a working day."
       }
     },
     "contractRenewals": {
@@ -127,7 +127,7 @@
     "excessFtes": {
       "label": "Excess FTEs",
       "tooltip": {
-        "card": "Hours not delivered, counted as whole people at 7.5 hours a working day."
+        "card": "Hours Shortfall, counted as whole people at 7.5 hours a working day."
       }
     },
     "overUtilizedEmployee": {
@@ -199,7 +199,7 @@
       }
     },
     "capacityGap": {
-      "label": "Hours not delivered",
+      "label": "Hours Shortfall",
       "tooltip": {
         "card": "Contracted productive hours not received."
       }
@@ -207,7 +207,7 @@
     "costOfGap": {
       "label": "Cost of the gap",
       "tooltip": {
-        "card": "Hours not delivered, valued at your rate card."
+        "card": "Hours Shortfall, valued at your rate card."
       }
     },
     "trackedOtHours": {

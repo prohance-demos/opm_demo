@@ -176,7 +176,7 @@ const sum = (f: (t: ReturnType<typeof aggregate>, n: string) => number) =>
 
 eq('TARGET capacity utilization ~60%', pct(F.capacityUtilization(all)), '59.98%')
 eq('TARGET leakage value ~$40M', usd(sum(F.leakageValue)), '$40.34M')
-eq('TARGET hours not delivered ~550K', hrs(F.hoursNotDelivered(all)), '550K hrs')
+eq('TARGET Hours Shortfall ~550K', hrs(F.hoursNotDelivered(all)), '550K hrs')
 eq('TARGET Excess FTEs north of 300', fte(F.fteEquivalent(all)), '380')
 eq('TARGET overtime rate ~9%', pct(F.overtimePct(all)), '9.32%')
 

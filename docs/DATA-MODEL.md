@@ -129,10 +129,10 @@ from the shipped ProHance build and verified against its published figures:
 | Leakage | non-productive hours / expected |
 | Leakage Value | non-productive hours x rate card |
 | Idle Capacity | 100 minus capacity utilization |
-| Hours not delivered | expected minus productive, floored at zero |
-| Cost Loss | hours not delivered x rate card |
+| Hours Shortfall | expected minus productive, floored at zero |
+| Cost Loss | Hours Shortfall x rate card |
 | Contract Value | expected x rate card |
-| FTE equivalent | hours not delivered / (7.5 x capacity days in the window) |
+| FTE equivalent | Hours Shortfall / (7.5 x capacity days in the window) |
 | Overtime Integrity | ot / logged |
 | Claimed overtime | tracked ot x the vendor's `claimedOtMultiplier` |
 | OT Cost | ot x rate card, no premium |
@@ -224,7 +224,7 @@ below that floor by arithmetic.
 
 `tests/engine.test.ts` asserts twenty-six figures per vendor for Yearly 2026,
 the five portfolio targets the model is calibrated to (60% capacity utilization,
-$40.34M leakage value, 550K hours not delivered, 380 FTE equivalent, 9.32%
+$40.34M leakage value, 550K Hours Shortfall, 380 FTE equivalent, 9.32%
 overtime), that each vendor travels the arc it was given, that high-rate
 utilization is a different number from effective utilization, that every vendor
 can show an overworked person,

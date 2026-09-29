@@ -291,7 +291,7 @@ test('the Cost Efficiency hero is five tiles in one row', async ({ page }) => {
   const tiles = page.locator('.kpis .kpi')
   await expect(tiles).toHaveCount(5)
   await expect(page.locator('.kpi-label')).toHaveText([
-    /Leakage Value/, /Capacity Utilization/, /Hours not delivered/,
+    /Leakage Value/, /Capacity Utilization/, /Hours Shortfall/,
     /Excess FTEs/, /Upcoming Contract Renewals/,
   ])
   // one row: every tile starts at the same y, and every number does too
@@ -605,7 +605,7 @@ test('a rising cost reads red even though the arrow points up', async ({ page })
     label: e.querySelector('.kpi-label')?.textContent?.trim() ?? '',
     cls: e.querySelector('.delta')?.className ?? '',
   })))
-  for (const t of tone.filter(x => /Leakage Value|Hours not delivered|Excess FTEs/.test(x.label))) {
+  for (const t of tone.filter(x => /Leakage Value|Hours Shortfall|Excess FTEs/.test(x.label))) {
     if (!t.cls) continue
     const up = /\bup\b/.test(t.cls)
     expect(t.cls, `${t.label} going ${up ? 'up' : 'down'} must read ${up ? 'bad' : 'good'}`)
@@ -850,7 +850,7 @@ test('the Financial Impact drilldown replicates the shipped slide-out', async ({
   await expect(panel.locator('[data-testid="cost-loss-total"]')).toHaveText('$34.24M')
   await expect(panel.locator('.dl-card .kv > div')).toHaveCount(3)
   await expect(panel).toContainText('Expected productive hours')
-  await expect(panel).toContainText('Hours not delivered')
+  await expect(panel).toContainText('Hours Shortfall')
   await expect(panel).toContainText('Excess FTEs')
   await expect(panel.locator('[data-dlperiod]')).toHaveCount(4)
   await expect(panel).toContainText('Financial Impact Trend')

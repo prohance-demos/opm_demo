@@ -8,7 +8,7 @@ export const CH = theme.chart
 /** A delta chip, or null when there is nothing to compare against.
  *
  *  `goodDown` says the metric is one where less is better: leakage, overtime,
- *  hours not delivered, cost loss. The arrow still points the way the number
+ *  Hours Shortfall, cost loss. The arrow still points the way the number
  *  moved; only the colour flips. */
 export function delta(
   cur: number | null,
